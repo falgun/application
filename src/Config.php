@@ -8,18 +8,19 @@ class Config
 
     protected array $configurations;
 
-    public function __construct(string $configDir)
+    private final function __construct(array $configurations)
     {
-        $this->loadConfigFromFile($configDir);
+        $this->configurations = $configurations;
     }
 
-    protected function loadConfigFromFile(string $directory)
+    public static function fromFileDir(string $directory): self
     {
         $dirIterator = new \RecursiveDirectoryIterator($directory, \RecursiveDirectoryIterator::SKIP_DOTS);
         $iterator = new \RecursiveIteratorIterator($dirIterator, \RecursiveIteratorIterator::SELF_FIRST);
 
-        $this->configurations = [];
+        $configurations = [];
 
+        /** @var \SplFileInfo $file */
         foreach ($iterator as $file) {
 
             if ($file->isDir()) {
@@ -28,8 +29,14 @@ class Config
 
             $configs = require $file->getRealPath();
 
-            $this->configurations = \array_merge($this->configurations, $configs);
+            $configurations = \array_merge($configurations, $configs);
         }
+
+        if (empty($configurations)) {
+            throw new \Exception('No config file found');
+        }
+
+        return new static($configurations);
     }
 
     public function get(string $key)

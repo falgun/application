@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Falgun\Application;
 
+use Falgun\Http\Request;
 use Falgun\Midlayer\Midlayer;
 use Falgun\Reporter\DevReporter;
 use Falgun\Http\RequestInterface;
@@ -37,10 +38,10 @@ class Application
         $this->reporter = $reporter;
     }
 
-    public function run(RequestInterface $request): void
+    public function run(Request $request): void
     {
         $requestContext = new RequestContext(
-            $request->uri->getSchemeAndHostWithoutDefaultPort(),
+            $request->uri()->getSchemeHostPathWithoutDefaultPort(),
             $request->getMethod()
         );
 

@@ -11,10 +11,9 @@ use Falgun\Template\TemplateInterface;
 class ResponseEmitter
 {
 
-    public function emit(Request $request, Response $response)
+    public function emit(Request $request, Response $response): void
     {
         $this->mustBeCleanSlate();
-
 
         $this->sendStatusCode($response);
         $this->sendHeaders($response->headers);
