@@ -28,6 +28,15 @@ class ResponseEmitter
             echo $response->getBody();
         }
 
+        $this->terminate();
+    }
+
+    private function terminate(): void
+    {
+        if (PHP_SAPI === 'cli') {
+            return;
+        }
+
         exit;
     }
 
