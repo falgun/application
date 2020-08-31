@@ -16,7 +16,7 @@ class ResponseEmitter
         $this->mustBeCleanSlate();
 
         $this->sendStatusCode($response);
-        $this->sendHeaders($response->headers);
+        $this->sendHeaders($response->headers());
 
         if ($request->isHeadMethod()) {
             exit;
@@ -37,7 +37,7 @@ class ResponseEmitter
         $file = null;
         $line = null;
 
-        if (headers_sent($file, $line)) {
+        if (\headers_sent($file, $line)) {
             throw new \RuntimeException(<<<TEXT
                 Headers were already sent in {$file} on line {$line}.
                 The response could not be emitted!
