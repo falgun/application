@@ -41,8 +41,10 @@ class Application
     public function run(Request $request): void
     {
         $requestContext = new RequestContext(
-            $request->uri()->getSchemeHostPathWithoutDefaultPort(),
-            $request->getMethod()
+            $request->getMethod(),
+            $request->uri()->getScheme(),
+            $request->uri()->getHost(),
+            $request->uri()->getPath(),
         );
 
         /* @var $route RouteInterface */
