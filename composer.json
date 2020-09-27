@@ -22,8 +22,12 @@
     },
     "require": {
         "php": "^7.4",
+        "falgunphp/fountain": "dev-master",
         "falgunphp/http": "^0.0",
-        "falgunphp/routing": "dev-master"
+        "falgunphp/midlayer": "dev-master",
+        "falgunphp/reporter": "dev-master",
+        "falgunphp/routing": "dev-master",
+        "falgunphp/template": "dev-master"
     },
     "require-dev": {
         "squizlabs/php_codesniffer": "^3.5",
