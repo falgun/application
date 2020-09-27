@@ -5,12 +5,12 @@ namespace Falgun\Application;
 
 use Falgun\Http\Request;
 use Falgun\Midlayer\Midlayer;
-use Falgun\Reporter\DevReporter;
 use Falgun\Http\RequestInterface;
 use Falgun\Http\ResponseInterface;
 use Falgun\Routing\RequestContext;
 use Falgun\Routing\RouteInterface;
 use Falgun\Routing\RouterInterface;
+use Falgun\Reporter\ReporterInterface;
 use Falgun\Template\TemplateInterface;
 use Falgun\Fountain\ContainerInterface;
 
@@ -21,14 +21,14 @@ class Application
     protected RouterInterface $router;
     protected ContainerInterface $container;
     protected array $middlewareGroups;
-    protected DevReporter $reporter;
+    protected ReporterInterface $reporter;
 
     public function __construct(
         Config $config,
         ContainerInterface $container,
         RouterInterface $router,
         array $middlewareGroups,
-        DevReporter $reporter
+        ReporterInterface $reporter
     )
     {
         $this->config = $config;
