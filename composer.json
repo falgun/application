@@ -22,7 +22,8 @@
     },
     "require": {
         "php": "^7.4",
-        "falgunphp/http": "^0.0"
+        "falgunphp/http": "^0.0",
+        "falgunphp/routing": "dev-master"
     },
     "require-dev": {
         "squizlabs/php_codesniffer": "^3.5",

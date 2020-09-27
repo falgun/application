@@ -87,14 +87,14 @@ class Application
 
     protected function prepareMiddlewareStack(RouteInterface $route): array
     {
-        if (empty($route->middlewares)) {
+        if (empty($route->getMiddlewares())) {
             return $this->middlewareGroups['web'] ?? [];
         }
 
         $middleWares = [];
         $groupAssigned = false;
 
-        foreach ($route->middlewares as $middleware) {
+        foreach ($route->getMiddlewares() as $middleware) {
             if (isset($this->middlewareGroups[$middleware])) {
                 $middleWares = \array_merge($middleWares, $this->middlewareGroups[$middleware]);
                 $groupAssigned = true;
