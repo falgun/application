@@ -13,6 +13,7 @@ use Falgun\Routing\RouterInterface;
 use Falgun\Reporter\ReporterInterface;
 use Falgun\Template\TemplateInterface;
 use Falgun\Fountain\ContainerInterface;
+use Falgun\Midlayer\MiddlewareInterface;
 
 class Application
 {
@@ -46,7 +47,7 @@ class Application
             $request->uri()->getHost(),
             $request->uri()->getPath(),
         );
-
+        
         /* @var $route RouteInterface */
         $route = $this->router->dispatch($requestContext);
 
@@ -80,7 +81,10 @@ class Application
         };
 
         $midlayer = new Midlayer($middleWares);
-        $midlayer->setResolver($this->container);
+        $container = $this->container;
+        $midlayer->setResolver(function (string $className) use($container): MiddlewareInterface {
+            return $container->get($className);
+        });
 
         return $midlayer->run($request, $target);
     }

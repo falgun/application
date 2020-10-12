@@ -1,23 +1,59 @@
 <?php
 declare(strict_types=1);
 
-namespace Falgun\Application\Tests;
+namespace {
+    define('ROOT_DIR', dirname(__DIR__));
+}
 
-use PHPUnit\Framework\TestCase;
+namespace Falgun\Application\Tests {
 
-final class ApplicationTest extends TestCase
-{
+    use Falgun\Routing\Router;
+    use Falgun\Fountain\Fountain;
+    use Falgun\Application\Config;
+    use PHPUnit\Framework\TestCase;
+    use Falgun\Reporter\ProdReporter;
+    use Falgun\Application\Application;
+    use Falgun\Fountain\SharedServices;
 
-    public function testApplication()
+    final class ApplicationTest extends TestCase
     {
-        $config = new \Falgun\Application\Config([]);
-        $container = new \Falgun\Fountain\Fountain(new \Falgun\Fountain\SharedServices());
-        $router = new \Falgun\Routing\Router('');
-        $middlewareGroups = [];
-        $reporter = new \Falgun\Reporter\ProdReporter();
-        $request = new \Falgun\Http\Request($uri, $queryDatas, $postDatas, $attributes, $headers, $cookies, $files, $serverDatas);
 
-        $application = new \Falgun\Application\Application($config, $container, $router, $middlewareGroups, $reporter);
-        $application->run($request);
+        public function testApplication()
+        {
+            $config = Config::fromFileDir(__DIR__ . '/Stubs/Config');
+            $container = new Fountain(new SharedServices());
+            $middlewareGroups = [];
+            $reporter = new ProdReporter();
+            $request = RequestBuilder::build();
+            $router = new Router($request->uri()->getFullDocumentRootUrl());
+            $router->any('/')->closure(function() {
+                return true;
+            });
+
+            $application = new Application($config, $container, $router, $middlewareGroups, $reporter);
+            $application->run($request);
+
+            $this->assertTrue(true);
+        }
+
+        public function testApplicationWithMiddleware()
+        {
+            $config = Config::fromFileDir(__DIR__ . '/Stubs/Config');
+            $container = new Fountain(new SharedServices());
+            $middlewareGroups = [];
+            $reporter = new ProdReporter();
+            $request = RequestBuilder::build();
+            $router = new Router($request->uri()->getFullDocumentRootUrl());
+            $router->any('/')->closure(function() {
+                return true;
+            })->middleware([Stubs\Middlewares\FakeMiddleware::class]);
+
+            $application = new Application($config, $container, $router, $middlewareGroups, $reporter);
+            $application->run($request);
+
+            $this->assertSame(1, $request->attributes()->get('layers'));
+            $this->assertSame(['FakeMiddleware'], $request->attributes()->get('middlewares'));
+        }
     }
+
 }
