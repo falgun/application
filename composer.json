@@ -24,10 +24,10 @@
         "php": "^7.4",
         "falgunphp/fountain": "dev-master",
         "falgunphp/http": "^0.0",
-        "falgunphp/midlayer": "dev-master",
+        "falgunphp/midlayer": "^0.0",
         "falgunphp/reporter": "dev-master",
         "falgunphp/routing": "dev-master",
-        "falgunphp/template": "dev-master"
+        "falgunphp/template": "^0.0"
     },
     "scripts": {
         "phpunit": "phpunit --verbose --colors=always"
