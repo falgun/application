@@ -22,12 +22,12 @@
     },
     "require": {
         "php": "^7.4|^8.0",
-        "falgunphp/fountain": "dev-master",
-        "falgunphp/http": "^0.0",
-        "falgunphp/midlayer": "^0.0",
-        "falgunphp/reporter": "dev-master",
-        "falgunphp/routing": "dev-master",
-        "falgunphp/template": "^0.0"
+        "falgunphp/fountain": "dev-master#6ac03957649fd9e73e89ee4e4eb93fda91fcc604",
+        "falgunphp/http": "^0.0.4",
+        "falgunphp/midlayer": "^0.0.2",
+        "falgunphp/reporter": "dev-master#1da03d03390b30791435999c64f2603230459a6d",
+        "falgunphp/routing": "dev-master#1083df48920ea49b81064b46188020f78bba87a2",
+        "falgunphp/template": "^0.0.2"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.5",

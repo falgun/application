@@ -42,10 +42,11 @@ final class Application
 
     public function run(RequestInterface $request): void
     {
-        $requestContext = new RequestContext(
+        $requestContext = RequestContext::fromUriParts(
             $request->getMethod(),
             $request->uri()->getScheme(),
             $request->uri()->getHost(),
+            $request->uri()->getPort(),
             $request->uri()->getPath(),
         );
 
