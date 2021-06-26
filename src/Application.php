@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Falgun\Application;
 
+use Closure;
 use Falgun\Http\Request;
 use Falgun\Midlayer\Midlayer;
 use Falgun\Http\RequestInterface;
@@ -15,14 +16,14 @@ use Falgun\Template\TemplateInterface;
 use Falgun\Fountain\ContainerInterface;
 use Falgun\Midlayer\MiddlewareInterface;
 
-class Application
+final class Application
 {
 
-    protected Config $config;
-    protected RouterInterface $router;
-    protected ContainerInterface $container;
-    protected array $middlewareGroups;
-    protected ReporterInterface $reporter;
+    private Config $config;
+    private RouterInterface $router;
+    private ContainerInterface $container;
+    private array $middlewareGroups;
+    private ReporterInterface $reporter;
 
     public function __construct(
         Config $config,
@@ -39,7 +40,7 @@ class Application
         $this->reporter = $reporter;
     }
 
-    public function run(Request $request): void
+    public function run(RequestInterface $request): void
     {
         $requestContext = new RequestContext(
             $request->getMethod(),
@@ -47,7 +48,7 @@ class Application
             $request->uri()->getHost(),
             $request->uri()->getPath(),
         );
-        
+
         /* @var $route RouteInterface */
         $route = $this->router->dispatch($requestContext);
 
@@ -56,7 +57,7 @@ class Application
         $this->reporter->setCurrentController($route->getController());
         $this->reporter->setCurrentMethod($route->getMethod());
 
-        $appDir = ROOT_DIR . '/' . $this->config->getIfAvailable('APP_DIR', 'src');
+        $appDir = $this->config->get('ROOT_DIR') . '/' . $this->config->getIfAvailable('APP_DIR', 'src');
 
         if ($response instanceof TemplateInterface) {
             $response->setViewDirFromControllerPath($route->getController(), $appDir . '/Views');
@@ -71,25 +72,47 @@ class Application
         }
     }
 
-    protected function runThroughMiddleWare(RouteInterface $route, RequestInterface $request)
+    /**
+     * @param RouteInterface $route
+     * @param RequestInterface $request
+     * @return mixed
+     */
+    private function runThroughMiddleWare(RouteInterface $route, RequestInterface $request)
     {
 
         $middleWares = $this->prepareMiddlewareStack($route);
 
-        $target = function() use($route) {
-            return $this->callController($route);
-        };
+        $target = $this->targetForMiddlewares($route);
 
         $midlayer = new Midlayer($middleWares);
-        $container = $this->container;
-        $midlayer->setResolver(function (string $className) use($container): MiddlewareInterface {
-            return $container->get($className);
-        });
+
+        $midlayer->setResolver($this->resolverForMiddlewares());
 
         return $midlayer->run($request, $target);
     }
 
-    protected function prepareMiddlewareStack(RouteInterface $route): array
+    /**
+     * @return Closure(class-string<MiddlewareInterface>): MiddlewareInterface
+     */
+    private function resolverForMiddlewares(): Closure
+    {
+        return function (string $className): MiddlewareInterface {
+            return $this->container->get($className);
+        };
+    }
+
+    /**
+     * @param RouteInterface $route
+     * @return Closure(): mixed
+     */
+    private function targetForMiddlewares(RouteInterface $route): Closure
+    {
+        return function() use($route) {
+            return $this->callController($route);
+        };
+    }
+
+    private function prepareMiddlewareStack(RouteInterface $route): array
     {
         if (empty($route->getMiddlewares())) {
             return $this->middlewareGroups['web'] ?? [];
@@ -115,18 +138,25 @@ class Application
         return \array_filter($middleWares);
     }
 
-    protected function callController(RouteInterface $route)
+    /**
+     * @param RouteInterface $route
+     * @return mixed
+     */
+    private function callController(RouteInterface $route)
     {
-        if (!empty($route->getController())) {
+        $controller = $route->getController();
+        $closure = $route->getClosure();
+
+        if (!empty($controller)) {
             // controller-action route
-            $object = $this->container->get($route->getController());
+            $object = $this->container->get($controller);
             $parameters = \array_values($route->getParameters());
 
             return $object->{$route->getMethod()}(...$parameters);
-        } elseif ($route->getClosure() instanceof \Closure) {
+        } elseif ($closure instanceof \Closure) {
             $parameters = \array_values($route->getParameters());
 
-            return $route->getClosure()(...$parameters);
+            return $closure(...$parameters);
         }
     }
 }

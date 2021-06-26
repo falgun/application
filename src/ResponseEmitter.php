@@ -3,22 +3,21 @@ declare(strict_types=1);
 
 namespace Falgun\Application;
 
-use Falgun\Http\Request;
-use Falgun\Http\Response;
+use Falgun\Http\RequestInterface;
+use Falgun\Http\ResponseInterface;
 use Falgun\Http\Parameters\Headers;
 use Falgun\Template\TemplateInterface;
 
-class ResponseEmitter
+final class ResponseEmitter
 {
-
-    public function emit(Request $request, Response $response): void
+    public function emit(RequestInterface $request, ResponseInterface $response): void
     {
         $this->mustBeCleanSlate();
 
         $this->sendStatusCode($response);
         $this->sendHeaders($response->headers());
 
-        if ($request->isHeadMethod()) {
+        if ($request->getMethod() === 'HEAD') {
             exit;
         }
 
@@ -40,9 +39,8 @@ class ResponseEmitter
         exit;
     }
 
-    protected function mustBeCleanSlate(): void
+    private function mustBeCleanSlate(): void
     {
-
         $file = null;
         $line = null;
 
@@ -54,14 +52,14 @@ class ResponseEmitter
         }
     }
 
-    protected function sendHeaders(Headers $headers): void
+    private function sendHeaders(Headers $headers): void
     {
         foreach ($headers->all() as $name => $value) {
             \header($name . ': ' . $value);
         }
     }
 
-    protected function sendStatusCode(Response $response): void
+    private function sendStatusCode(ResponseInterface $response): void
     {
         \http_response_code($response->getStatusCode());
     }
